@@ -5,9 +5,6 @@ import os
 
 st.set_page_config(page_title="HopeFund", layout="wide")
 
-# === Auto-refresh every 5 seconds ===
-st_autorefresh = st.experimental_rerun  # use rerun only when triggered below
-
 GOAL = 10_000_000
 DATA_FILE = "donations.json"
 
@@ -24,7 +21,7 @@ def save_data(data):
     with open(DATA_FILE, "w") as f:
         json.dump(data, f)
 
-# Sidebar admin panel
+# === Sidebar admin panel ===
 st.sidebar.title("Admin / Test Panel")
 donation = st.sidebar.number_input("Add donation (₹)", min_value=0, step=100)
 if st.sidebar.button("Add"):
@@ -33,8 +30,8 @@ if st.sidebar.button("Add"):
     save_data(data)
     st.sidebar.success(f"Added ₹{donation}")
 
-# === Auto-refresh using Streamlit's st_autorefresh ===
-count = st.experimental_autorefresh(interval=5000, limit=None, key="progress_refresh")
+# === Auto-refresh every 5 seconds ===
+st.experimental_autorefresh(interval=5000, limit=None, key="progress_refresh")
 
 # === Load donations ===
 data = load_data()
@@ -45,6 +42,7 @@ progress = min(progress, 100.0)
 with open("Untitled-1.html", "r", encoding="utf-8") as f:
     html_code = f.read()
 
+# Inject current progress
 html_code = html_code.replace("0%", f"{progress}% (₹{data.get('total', 0)} / ₹{GOAL})")
 html_code = html_code.replace("width: 0%;", f"width: {progress}%;")
 
