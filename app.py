@@ -31,7 +31,7 @@ if st.sidebar.button("Add"):
     st.sidebar.success(f"Added ₹{donation}")
 
 # === Calculate Progress ===
-progress = int((latest["total"] / GOAL) * 100)
+progress = round((data["total"] / GOAL) * 100, 2)  # use data, not latest
 progress = min(progress, 100)  # cap at 100%
 
 # === Inject into HTML ===
