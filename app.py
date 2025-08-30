@@ -1,55 +1,56 @@
 import streamlit as st
 import streamlit.components.v1 as components
-import json
-import os
+import json, os
 
 st.set_page_config(page_title="HopeFund", layout="wide")
 
-# === Config ===
-GOAL = 10000000  # target in INR
+GOAL = 10_000_000  # INR
 DATA_FILE = "donations.json"
 
-# === Load/Init Donations ===
-if os.path.exists(DATA_FILE):
-    with open(DATA_FILE, "r") as f:
-        data = json.load(f)
-else:
+def load_data():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as f:
+            return json.load(f)
     data = {"total": 0}
     with open(DATA_FILE, "w") as f:
         json.dump(data, f)
+    return data
 
-# === Sidebar for Admin/Testing ===
+def save_data(data):
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f)
+
+# === Load once ===
+data = load_data()
+
+# === Sidebar Admin ===
 st.sidebar.title("Admin / Test Panel")
 donation = st.sidebar.number_input("Add donation (₹)", min_value=0, step=100)
 if st.sidebar.button("Add"):
-    # Always reload before writing
-    with open(DATA_FILE, "r") as f:
-        latest = json.load(f)
-    latest["total"] += donation
-    with open(DATA_FILE, "w") as f:
-        json.dump(latest, f)
+    # Reload before write to avoid overwrites from other processes
+    data = load_data()
+    data["total"] = int(data.get("total", 0)) + int(donation)
+    save_data(data)
     st.sidebar.success(f"Added ₹{donation}")
 
-# === Calculate Progress ===
-progress = round((data["total"] / GOAL) * 100, 2)  # use data, not latest
-progress = min(progress, 100)  # cap at 100%
+# === Calculate Progress (use `data`, not `latest`) ===
+progress = round((data.get("total", 0) / GOAL) * 100, 2)
+progress = min(progress, 100.0)
 
 # === Inject into HTML ===
 with open("Untitled-1.html", "r", encoding="utf-8") as f:
     html_code = f.read()
 
-# Replace placeholders with real values
-html_code = html_code.replace("0%", f"{progress}% (₹{data['total']} / ₹{GOAL})")
-html_code = html_code.replace('width: 0%;', f'width: {progress}%;')
+# Replace initial values so the page isn't blank before JS fetch runs
+html_code = html_code.replace("0%", f"{progress}% (₹{data.get('total', 0)} / ₹{GOAL})")
+html_code = html_code.replace("width: 0%;", f"width: {progress}%;")
 
 # === Render Full Screen ===
-st.markdown(
-    """
-    <style>
-    .block-container {padding: 0 !important;}
-    header, footer {visibility: hidden;}
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown("""
+<style>
+.block-container {padding: 0 !important;}
+header, footer {visibility: hidden;}
+</style>
+""", unsafe_allow_html=True)
+
 components.html(html_code, height=2000, scrolling=True)
