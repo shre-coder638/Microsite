@@ -30,10 +30,7 @@ if st.sidebar.button("Add"):
     save_data(data)
     st.sidebar.success(f"Added ₹{donation}")
 
-# === Auto-refresh every 5 seconds ===
-st.experimental_autorefresh(interval=5000, limit=None, key="progress_refresh")
-
-# === Load donations ===
+# === Load donations and calculate progress ===
 data = load_data()
 progress = round((data.get("total", 0) / GOAL) * 100, 2)
 progress = min(progress, 100.0)
@@ -42,9 +39,13 @@ progress = min(progress, 100.0)
 with open("Untitled-1.html", "r", encoding="utf-8") as f:
     html_code = f.read()
 
-# Inject current progress
 html_code = html_code.replace("0%", f"{progress}% (₹{data.get('total', 0)} / ₹{GOAL})")
 html_code = html_code.replace("width: 0%;", f"width: {progress}%;")
 
-# === Render HTML ===
-components.html(html_code, height=2000, scrolling=True)
+# === Render HTML inside a container ===
+html_container = st.empty()
+html_container.html(html_code, height=2000, scrolling=True)
+
+# === Manual refresh button ===
+if st.button("Refresh Progress"):
+    st.experimental_rerun()
