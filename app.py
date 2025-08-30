@@ -22,13 +22,16 @@ else:
 st.sidebar.title("Admin / Test Panel")
 donation = st.sidebar.number_input("Add donation (₹)", min_value=0, step=100)
 if st.sidebar.button("Add"):
-    data["total"] += donation
+    # Always reload before writing
+    with open(DATA_FILE, "r") as f:
+        latest = json.load(f)
+    latest["total"] += donation
     with open(DATA_FILE, "w") as f:
-        json.dump(data, f)
+        json.dump(latest, f)
     st.sidebar.success(f"Added ₹{donation}")
 
 # === Calculate Progress ===
-progress = int((data["total"] / GOAL) * 100)
+progress = int((latest["total"] / GOAL) * 100)
 progress = min(progress, 100)  # cap at 100%
 
 # === Inject into HTML ===
