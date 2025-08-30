@@ -124,20 +124,21 @@
     });
 
     // Fetch progress from backend
-    async function fetchProgress() {
-      try {
-        const res = await fetch("http://127.0.0.1:5000/progress");
-        const data = await res.json();
-        progressBar.style.width = data.progress + "%";
-        progressText.textContent = data.progress + "% (₹" + data.total + " / ₹" + data.goal + ")";
-      } catch (err) {
-        console.error("Error fetching progress:", err);
-      }
-    }
+    // Fetch progress from backend
+async function fetchProgress() {
+  try {
+    const res = await fetch("http://127.0.0.1:5000/progress");
+    const data = await res.json();
+    progressBar.style.width = data.progress + "%";
+    progressText.textContent = data.progress + "% (₹" + data.total + " / ₹" + data.goal + ")";
+  } catch (err) {
+    console.error("Error fetching progress:", err);
+  }
+}
 
-    // Run once + refresh every 5s
-    fetchProgress();
-    setInterval(fetchProgress, 5000);
+// Run once + refresh every 5s
+fetchProgress();
+setInterval(fetchProgress, 5000);
 
     // Donation amount buttons
     document.querySelectorAll(".amounts button").forEach(btn => {
