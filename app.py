@@ -43,10 +43,5 @@ with open("Untitled-1.html", "r", encoding="utf-8") as f:
 html_code = html_code.replace("0%", f"{progress}% (₹{data.get('total', 0)} / ₹{GOAL})")
 html_code = html_code.replace("width: 0%;", f"width: {progress}%;")
 
-# Render HTML
-html_container = st.empty()
-html_container.html(html_code, height=2000)  # removed scrolling=True
-
-# Optional: manual refresh button
-if st.button("Refresh Progress"):
-    st.experimental_rerun()
+# Render full HTML using components.html()
+components.html(html_code, height=2000)  # <-- works for full pages
